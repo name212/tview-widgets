@@ -15,7 +15,7 @@ import (
 //
 // See https://github.com/rivo/tview/wiki/NoneFocusableButton for an example.
 type NoneFocusableButton struct {
-	label tview.TextView
+	*tview.TextView
 	// The button's style (when deactivated).
 	style tcell.Style
 
@@ -31,52 +31,17 @@ type NoneFocusableButton struct {
 // NewNoneFocusableButton returns a NoneFocusableButton without a border.
 func NewNoneFocusableButton(l string) *NoneFocusableButton {
 	b := &NoneFocusableButton{
-		label:         *tview.NewTextView().SetLabelWidth(3).SetTextAlign(tview.AlignCenter).SetLabel(l),
+		TextView:      tview.NewTextView().SetTextAlign(tview.AlignCenter).SetLabel(l),
 		style:         tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.PrimaryTextColor),
 		disabledStyle: tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.ContrastSecondaryTextColor),
 	}
 
-	b.SetDisabled(false)
+	_, bg, _ := b.style.Decompose()
+
+	b.SetTextStyle(b.style)
+	b.SetBackgroundColor(bg)
 
 	return b
-}
-
-// SetStyle sets the style of the button used when it is not focused.
-func (b *NoneFocusableButton) SetStyle(style tcell.Style) *NoneFocusableButton {
-	b.style = style
-	return b
-}
-
-// SetDisabledStyle sets the style of the button used when it is disabled.
-func (b *NoneFocusableButton) SetDisabledStyle(style tcell.Style) *NoneFocusableButton {
-	b.disabledStyle = style
-	return b
-}
-
-// SetDisabled sets whether or not the button is disabled. Disabled buttons
-// cannot be activated.
-//
-// If the button is part of a form, you should set focus to the form itself
-// after calling this function to set focus to the next non-disabled form item.
-func (b *NoneFocusableButton) SetDisabled(disabled bool) *NoneFocusableButton {
-	st := b.style
-	if disabled {
-		st = b.disabledStyle
-	}
-
-	_, bg, _ := st.Decompose()
-
-	b.label.SetBackgroundColor(bg)
-	b.label.SetTextStyle(st)
-	b.label.SetDisabled(disabled)
-
-	b.disabled = disabled
-	return b
-}
-
-// IsDisabled returns whether or not the button is disabled.
-func (b *NoneFocusableButton) IsDisabled() bool {
-	return b.disabled
 }
 
 // Draw draws this primitive onto the screen.
@@ -89,26 +54,6 @@ func (b *NoneFocusableButton) SetFocusable(f tview.Primitive) *NoneFocusableButt
 func (b *NoneFocusableButton) SetClick(c func()) *NoneFocusableButton {
 	b.click = c
 	return b
-}
-
-// Draw draws this primitive onto the screen.
-func (b *NoneFocusableButton) Draw(screen tcell.Screen) {
-	b.label.Draw(screen)
-}
-
-// GetRect returns the current position of the rectangle, x, y, width, and
-// height.
-func (b *NoneFocusableButton) GetRect() (int, int, int, int) {
-	return b.label.GetRect()
-}
-
-// SetRect sets a new position of the primitive. Note that this has no effect
-// if this primitive is part of a layout (e.g. Flex, Grid) or if it was added
-// like this:
-//
-//	application.SetRoot(p, true)
-func (b *NoneFocusableButton) SetRect(x, y, width, height int) {
-	b.label.SetRect(x, y, width, height)
 }
 
 // InputHandler returns nil. NoneFocusableButton has no default input handling.
@@ -134,7 +79,7 @@ func (b *NoneFocusableButton) Blur() {
 // MouseHandler returns nil. NoneFocusableButton has no default mouse handling.
 func (b *NoneFocusableButton) MouseHandler() func(action tview.MouseAction, event *tcell.EventMouse, setFocus func(p tview.Primitive)) (consumed bool, capture tview.Primitive) {
 	return func(action tview.MouseAction, event *tcell.EventMouse, setFocus func(p tview.Primitive)) (consumed bool, capture tview.Primitive) {
-		if action == tview.MouseLeftClick && b.label.InRect(event.Position()) {
+		if action == tview.MouseLeftClick && b.InRect(event.Position()) {
 			if b.click != nil {
 				b.click()
 			}
