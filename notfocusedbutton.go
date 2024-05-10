@@ -15,14 +15,7 @@ import (
 //
 // See https://github.com/rivo/tview/wiki/NoneFocusableButton for an example.
 type NoneFocusableButton struct {
-	*tview.TextView
-	// The button's style (when deactivated).
-	style tcell.Style
-
-	// The button's style (when disabled).
-	disabledStyle tcell.Style
-
-	disabled bool
+	*tview.Button
 
 	focusable tview.Primitive
 	click     func()
@@ -31,16 +24,11 @@ type NoneFocusableButton struct {
 // NewNoneFocusableButton returns a NoneFocusableButton without a border.
 func NewNoneFocusableButton(l string) *NoneFocusableButton {
 	b := &NoneFocusableButton{
-		TextView:      tview.NewTextView().SetTextAlign(tview.AlignCenter).SetLabel(l),
-		style:         tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.PrimaryTextColor),
-		disabledStyle: tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.ContrastSecondaryTextColor),
+		Button: tview.NewButton(l),
 	}
 
-	_, bg, _ := b.style.Decompose()
-
-	b.SetTextStyle(b.style)
-	b.SetBackgroundColor(bg)
-
+	b.SetDisabledStyle(tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.ContrastSecondaryTextColor))
+	b.SetStyle(tcell.StyleDefault.Background(tview.Styles.ContrastBackgroundColor).Foreground(tview.Styles.PrimaryTextColor))
 	return b
 }
 

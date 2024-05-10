@@ -4,7 +4,6 @@ import (
 	"image"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 	. "github.com/rivo/tview"
 )
 
@@ -91,15 +90,20 @@ func NewFormScrollable() *FormScrollable {
 		all := len(f.items) + len(f.buttons)
 		var nn func(int)
 		nn = func(next int) {
-			if next >= all {
+			if next > 0 {
+				f.upScrollButton.SetDisabled(false)
+			}
+
+			if next >= all-1 {
 				f.downScrollButton.SetDisabled(true)
+			}
+
+			if next >= all {
 				return
 			}
 
-			f.downScrollButton.SetDisabled(false)
-
 			if next < len(f.items) {
-				if _, ok := f.GetFormItem(next).(*tview.TextView); ok {
+				if _, ok := f.GetFormItem(next).(*TextView); ok {
 					nn(next + 1)
 					return
 				}
@@ -112,20 +116,23 @@ func NewFormScrollable() *FormScrollable {
 
 	}
 
-	f.downScrollButton.SetFocusable(f).SetClick(onNext)
+	f.downScrollButton.SetFocusable(f).SetClick(onNext).SetDisabled(false)
 
 	onBack := func() {
 		var bb func(int)
 		bb = func(prev int) {
-			if prev < 0 {
+			if prev == 0 {
 				f.upScrollButton.SetDisabled(true)
+			}
+
+			if prev < 0 {
 				return
 			}
 
-			f.upScrollButton.SetDisabled(false)
+			f.downScrollButton.SetDisabled(false)
 
 			if prev < len(f.items) {
-				if _, ok := f.GetFormItem(prev).(*tview.TextView); ok {
+				if _, ok := f.GetFormItem(prev).(*TextView); ok {
 					bb(prev - 1)
 					return
 				}
@@ -138,7 +145,7 @@ func NewFormScrollable() *FormScrollable {
 
 	}
 
-	f.upScrollButton.SetFocusable(f).SetClick(onBack)
+	f.upScrollButton.SetFocusable(f).SetClick(onBack).SetDisabled(true)
 
 	return f
 }
