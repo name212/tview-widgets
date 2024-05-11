@@ -5,15 +5,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-// NoneFocusableButton implements the Primitive interface with an empty background and optional
-// elements such as a border and a title. NoneFocusableButton itself does not hold any content
-// but serves as the superclass of all other primitives. Subclasses add their
-// own content, typically (but not necessarily) keeping their content within the
-// NoneFocusableButton's rectangle.
-//
-// NoneFocusableButton provides a number of utility functions available to all primitives.
-//
-// See https://github.com/rivo/tview/wiki/NoneFocusableButton for an example.
+// NoneFocusableButton delegate focus to another element when button was clicked
 type NoneFocusableButton struct {
 	*tview.Button
 

@@ -7,12 +7,9 @@ import (
 	. "github.com/rivo/tview"
 )
 
-// FormScrollable allows you to combine multiple one-line form elements into a vertical
-// or horizontal layout. FormScrollable elements include types such as InputField or
-// Checkbox. These elements can be optionally followed by one or more buttons
-// for which you can define form-wide actions (e.g. Save, Clear, Cancel).
-//
-// See https://github.com/rivo/tview/wiki/FormScrollable for an example.
+// FormScrollable is a form from original tview with two buttons
+// which change elements focus by one item up an down. Also buttons show
+// allowing scalable (will disabled when firs and last element in focus)
 type FormScrollable struct {
 	*Box
 
@@ -742,6 +739,9 @@ func (f *FormScrollable) Focus(delegate func(p Primitive)) {
 	// Hand on the focus to one of our child elements.
 	if f.focusedElement < 0 || f.focusedElement >= len(f.items)+len(f.buttons) {
 		f.focusedElement = 0
+		f.upScrollButton.SetDisabled(true)
+		f.downScrollButton.SetDisabled(f.GetFormItemCount() == 1)
+
 	}
 	var handler func(key tcell.Key)
 	handler = func(key tcell.Key) {
@@ -751,11 +751,25 @@ func (f *FormScrollable) Focus(delegate func(p Primitive)) {
 		switch key {
 		case tcell.KeyTab, tcell.KeyEnter:
 			f.focusedElement++
+			if f.focusedElement >= len(f.items)+len(f.buttons)-1 {
+				f.downScrollButton.SetDisabled(true)
+			}
+			f.upScrollButton.SetDisabled(false)
 			f.Focus(delegate)
 		case tcell.KeyBacktab:
 			f.focusedElement--
+			if f.focusedElement == 0 {
+				f.upScrollButton.SetDisabled(true)
+				if f.GetFormItemCount() == 1 {
+					f.downScrollButton.SetDisabled(true)
+				}
+			}
 			if f.focusedElement < 0 {
 				f.focusedElement = len(f.items) + len(f.buttons) - 1
+				f.downScrollButton.SetDisabled(true)
+				f.upScrollButton.SetDisabled(false)
+			} else {
+				f.downScrollButton.SetDisabled(false)
 			}
 			f.Focus(delegate)
 		case tcell.KeyEscape:
@@ -763,6 +777,8 @@ func (f *FormScrollable) Focus(delegate func(p Primitive)) {
 				f.cancel()
 			} else {
 				f.focusedElement = 0
+				f.upScrollButton.SetDisabled(true)
+				f.downScrollButton.SetDisabled(f.GetFormItemCount() == 1)
 				f.Focus(delegate)
 			}
 		default:
@@ -784,6 +800,8 @@ func (f *FormScrollable) Focus(delegate func(p Primitive)) {
 				f.focusedElement++
 				if f.focusedElement >= len(f.items)+len(f.buttons) {
 					f.focusedElement = 0
+					f.upScrollButton.SetDisabled(true)
+					f.downScrollButton.SetDisabled(f.GetFormItemCount() == 1)
 				}
 				continue
 			}
@@ -845,6 +863,18 @@ func (f *FormScrollable) MouseHandler() func(action MouseAction, event *tcell.Ev
 				if index >= 0 {
 					f.focusedElement = index
 				}
+
+				if f.focusedElement <= 0 {
+					f.upScrollButton.SetDisabled(true)
+					f.downScrollButton.SetDisabled(f.GetFormItemCount() == 1)
+				} else if f.focusedElement >= len(f.items)+len(f.buttons)-1 {
+					f.upScrollButton.SetDisabled(false)
+					f.downScrollButton.SetDisabled(true)
+				} else {
+					f.upScrollButton.SetDisabled(false)
+					f.downScrollButton.SetDisabled(false)
+				}
+
 			}
 		}()
 
