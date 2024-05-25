@@ -2,7 +2,7 @@
 package main
 
 import (
-	form "github.com/name212/tview-scrollable-form"
+	form "github.com/name212/tview-widgets"
 	"github.com/rivo/tview"
 )
 

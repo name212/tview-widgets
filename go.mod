@@ -1,4 +1,4 @@
-module github.com/name212/tview-scrollable-form
+module github.com/name212/tview-widgets
 
 go 1.20
 
